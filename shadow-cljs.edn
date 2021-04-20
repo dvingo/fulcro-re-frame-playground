@@ -11,8 +11,7 @@
                 ;; guardrails checks only during dev
                 :dev               {:compiler-options {:external-config {:guardrails {}
                                                                          :fulcro     {:wrap-inputs? false}}}
-                                    :closure-defines  {
-                                                       dv.fulcro-re-frame.play.client.application/LOG-RESPONSES true
+                                    :closure-defines  {dv.fulcro-re-frame.play.client.application/LOG-RESPONSES true
                                                        dv.fulcro-re-frame.play.client.client-entry/LOG_LEVEL    "debug"}}
                 :devtools          {:after-load dv.fulcro-re-frame.play.client.client-entry/refresh
                                     :preloads   [;; if using the chrome extension:

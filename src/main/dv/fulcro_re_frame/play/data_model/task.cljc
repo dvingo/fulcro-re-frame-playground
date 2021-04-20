@@ -13,6 +13,7 @@
 
 (s/def :task/id fu/id?)
 (s/def :task/description string?)
+(s/def :task/number int?)
 
 (def required-task-keys [:task/id :task/description])
 (def optional-task-keys [])
@@ -24,10 +25,11 @@
                 :opt [:db/created-at :db/updated-at :crux.db/id]))
 
 (>defn make-task
-  [{:task/keys [id description]
-    :or        {id (fu/uuid)}}]
+  [{:task/keys [id description number]
+    :or        {id (fu/uuid) number 0}}]
   [map? => ::task]
   {:task/id          id
+   :task/number      number
    :task/description description})
 
 (comment (make-task {:task/description "TEST"}))
@@ -40,4 +42,3 @@
 (comment
   (make-task {:task/id          :TESTING
               :task/description "desc"}))
-

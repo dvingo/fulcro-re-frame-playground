@@ -1,9 +1,4 @@
-# Prerequisites
-
-This template utilizes GNU Make 4.x. You'll need to install it first 
-before executing `make`.
-
-This template uses `yarn` to handle npm dependencies.
+An experiment to combine re-frame subscriptions with fulcro components.
 
 # Start dev
 
@@ -29,28 +24,3 @@ allow requiring cljs.pprint during development and not having to remove the name
 If you don't use `make fe` to build your ClojureScript this namespace won't exist on the first build.
 
 Likewise, When building for production use: `make fe-releaes`
-
-Please see the `shadow-cljs.edn` file for ports used for development builds.
-
-If any of those ports are used already shadow-cljs will try different ports so please see the console output 
-by shadow-cljs.
-
-
-## Editor setup
-
-In your editor:
-add 2 repls:
-
-### frontend repl:
-
-nREPL remote:
-
-  localhost:$port
-  
-The $port defaults to 9000 but may be different if 9000 is already in use.
-
-Using this repl you connect to the various ClojureScript builds using `(shadow/repl :build-id)`
-
-
-
-

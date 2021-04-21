@@ -31,6 +31,6 @@
   (log/merge-config! log-config)
   (log/info "Application starting.")
   (app/set-root! SPA root/Root {:initialize-state? true})
-  (fr/start-router! SPA)
+  (fr/start-router! SPA {:use-fragment true})
   (log/info "MOUNTING APP")
   (js/setTimeout #(app/mount! SPA root/Root "app" {:initialize-state? true})))

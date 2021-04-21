@@ -1,5 +1,20 @@
 An experiment to combine re-frame subscriptions with fulcro components.
 
+
+
+todo
+
+write usage
+- (defsc-re-frame)
+- subs
+- write your own subs
+- use sub-name
+
+need to add support to reitit to match on a common prefix to support github pages use case.
+
+# Usage
+
+
 # Start dev
 
 ## Shadow cljs tasks

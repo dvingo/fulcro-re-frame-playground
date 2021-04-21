@@ -5,21 +5,24 @@
     [com.fulcrologic.fulcro.dom :as dom :refer [div]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.ui-state-machines :as sm]
-    [dv.fulcro-reitit :as fr]
     [dv.cljs-emotion-reagent :refer [global-style theme-provider]]
-    [dv.fulcro-re-frame.play.client.ui.task-item :refer [ui-task-list TaskList TaskForm ui-task-form]]
     [dv.fulcro-re-frame.play.client.application :refer [SPA]]
-    [dv.fulcro-re-frame.play.client.ui.task-page :refer [TaskPage]]
     [dv.fulcro-re-frame.play.client.ui.styles.app-styles :as styles]
     [dv.fulcro-re-frame.play.client.ui.styles.global-styles :refer [global-styles]]
     [dv.fulcro-re-frame.play.client.ui.styles.style-themes :as themes]
-    [taoensso.timbre :as log]))
+    [dv.fulcro-re-frame.play.client.ui.task-item :refer [ui-task-list TaskList TaskForm ui-task-form]]
+    [dv.fulcro-re-frame.play.client.ui.task-page :refer [TaskPage]]
+    [space.matterandvoid.space.fulcro-reitit :as fr]
+    [taoensso.timbre :as log])
+  (:import goog.Uri))
 
 (dr/defrouter TopRouter
   [this {:keys [current-state route-factory route-props]}]
   {:router-targets [TaskPage]})
 
 (def ui-top-router (c/factory TopRouter))
+(comment
+  (.getDomain (.parse Uri js/location)))
 
 (defsc PageContainer [this {:root/keys [router] :as props}]
   {:query         [{:root/router (c/get-query TopRouter)}
@@ -39,7 +42,7 @@
   {:query         [{:root/page-container (c/get-query PageContainer)}
                    :root/style-theme]
    :initial-state (fn [_] {:root/page-container (c/get-initial-state PageContainer {})
-                           :root/style-theme themes/light-theme})}
+                           :root/style-theme    themes/light-theme})}
   (theme-provider
     {:theme style-theme}
     (global-style (global-styles style-theme))

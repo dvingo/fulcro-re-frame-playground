@@ -1,13 +1,13 @@
 (ns dv.fulcro-re-frame.play.client.client-entry
   (:require
-    [com.fulcrologic.fulcro.application :as app]
-    [com.fulcrologic.fulcro.ui-state-machines :as uism]
-    [com.fulcrologic.fulcro.components :as c]
     [clojure.edn :as edn]
-    [dv.fulcro-re-frame.play.client.ui.root :as root]
+    [com.fulcrologic.fulcro.application :as app]
+    [com.fulcrologic.fulcro.components :as c]
+    [com.fulcrologic.fulcro.ui-state-machines :as uism]
     [dv.fulcro-re-frame.play.client.application :refer [SPA]]
+    [dv.fulcro-re-frame.play.client.ui.root :as root]
     [shadow.resource :as rc]
-    [dv.fulcro-reitit :as fr]
+    [space.matterandvoid.space.fulcro-reitit :as fr]
     [taoensso.timbre :as log]))
 
 ;; set logging lvl using goog-define, see shadow-cljs.edn
@@ -32,5 +32,5 @@
   (log/info "Application starting.")
   (app/set-root! SPA root/Root {:initialize-state? true})
   (fr/start-router! SPA)
-   (log/info "MOUNTING APP")
+  (log/info "MOUNTING APP")
   (js/setTimeout #(app/mount! SPA root/Root "app" {:initialize-state? true})))

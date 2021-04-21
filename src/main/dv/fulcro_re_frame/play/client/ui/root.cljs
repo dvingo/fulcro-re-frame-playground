@@ -13,7 +13,6 @@
     [dv.fulcro-re-frame.play.client.ui.styles.app-styles :as styles]
     [dv.fulcro-re-frame.play.client.ui.styles.global-styles :refer [global-styles]]
     [dv.fulcro-re-frame.play.client.ui.styles.style-themes :as themes]
-
     [taoensso.timbre :as log]))
 
 (dr/defrouter TopRouter

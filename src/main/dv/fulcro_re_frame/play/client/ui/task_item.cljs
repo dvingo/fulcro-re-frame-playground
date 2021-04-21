@@ -10,7 +10,8 @@
     [dv.fulcro-entity-state-machine :as fmachine]
     [dv.fulcro-re-frame.play.data-model.task :as dm]
     [re-frame.core :as rf]
-    [taoensso.timbre :as log])
+    [taoensso.timbre :as log]
+    [clojure.string :as str])
   (:require-macros [dv.fulcro-re-frame.play.client.fe-macros :as rfm :refer [defsc-re-frame]]))
 
 (defstyled flex :div
@@ -38,11 +39,29 @@
 (def ui-task-item (c/factory TaskItem {:keyfn :task/id}))
 
 
-;; maybe it's a better design to juse keep the case of the keywords
-;; then when you manually type them there is one less translation step.
+
+(defn make-sub-keyword
+  "Takes prop name (keyword as used in a fulcro query) and returns a string version of it to
+  be used in a re-frame subscription.
+
+  ex:
+  :task/id => task-id
+  :id => id"
+  [prop]
+  (if (qualified-keyword? prop)
+    (str (namespace prop) "-" (name prop))
+    (name prop)))
+
+(defn sub-name [cls prop]
+  (let [[ns-name cls-name] (str/split (c/component-name cls) "/")]
+    (keyword ns-name (str cls-name "-" (make-sub-keyword prop)))))
+
+(declare TaskList)
+
 (rf/reg-sub
   ::TaskList-total
-  (fn [[_ this]] (rf/subscribe [::TaskList-all-tasks this]))
+  (fn [[_ this]] (rf/subscribe [(sub-name TaskList :all-tasks) this]
+                   #_[::TaskList-all-tasks this]))
   (fn [items] (reduce (fn [a i] (+ a (:task/number i))) 0 items)))
 
 (defn total-component [this]

@@ -8,6 +8,7 @@
            com.fulcrologic/fulcro              {:mvn/version "3.4.21"
                                                 :exclusions  [com.cognitect/transit-cljs
                                                               com.cognitect/transit-js]}
+           org.slf4j/slf4j-nop                 {:mvn/version "2.0.0-alpha1"}
            com.cognitect/transit-cljs          {:mvn/version "0.8.264"}
            com.fulcrologic/semantic-ui-wrapper {:mvn/version "2.0.1"}
            com.fulcrologic/guardrails          {:mvn/version "1.1.4"}

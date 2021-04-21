@@ -7,7 +7,7 @@
     [dv.fulcro-re-frame.play.client.application :refer [SPA]]
     [dv.fulcro-re-frame.play.client.ui.root :as root]
     [shadow.resource :as rc]
-    [space.matterandvoid.space.fulcro-reitit :as fr]
+    [space.matterandvoid.fulcro-reitit :as fr]
     [taoensso.timbre :as log]))
 
 ;; set logging lvl using goog-define, see shadow-cljs.edn

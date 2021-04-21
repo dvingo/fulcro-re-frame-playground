@@ -3,7 +3,7 @@
     [com.fulcrologic.fulcro.components :as c :refer [defsc]]
     [dv.fulcro-re-frame.play.client.ui.task-item :refer
      [ui-task-list TaskList TaskForm ui-task-form TaskItem]]
-    [space.matterandvoid.space.fulcro-reitit :as fr]))
+    [space.matterandvoid.fulcro-reitit :as fr]))
 
 (defsc TaskPage
   [this {:keys [task-list task-form]}]

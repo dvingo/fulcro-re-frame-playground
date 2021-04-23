@@ -30,6 +30,10 @@ of a list of children's data.
 A synchronous fulcro mutation is used to demonstrate the fulcro parent component's failure to re-render and show a re-frame
 component re-rendering due to the subscription graph triggering an update.
 
+See it running here:
+
+https://dvingo.github.io/fulcro-re-frame-playground/
+
 This is an experiment and there will likely be issues if you, for example, want to render a fulcro component from within
 a reagent component (I think you should be able to pass the `db->tree` to the desired fulcro component using a subscription
 but there are propbably gotchas).
@@ -65,7 +69,7 @@ component's render function:
 
 ```clojure 
 (defn my-re-frame-component [this]
-    (let [my-fulcro-prop @(rf/subscribe [::YourComponent-abc-prop this])]
+    (let [my-fulcro-prop @(rf/subscribe [::YourComponent-abc-prop1 this])]
       [:h3 "re-frame value: " my-fulcro-prop]))
 ```
 

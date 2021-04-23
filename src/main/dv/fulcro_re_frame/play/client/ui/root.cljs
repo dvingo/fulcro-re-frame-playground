@@ -12,15 +12,12 @@
     [dv.fulcro-re-frame.play.client.ui.styles.style-themes :as themes]
     [dv.fulcro-re-frame.play.client.ui.task-item :refer [ui-task-list TaskList TaskForm ui-task-form]]
     [dv.fulcro-re-frame.play.client.ui.task-page :refer [TaskPage]]
-    [space.matterandvoid.fulcro-reitit :as fr]
     [taoensso.timbre :as log])
   (:import goog.Uri))
 
 (dr/defrouter TopRouter
   [this {:keys [current-state route-factory route-props]}]
   {:router-targets [TaskPage]})
-
-(fr/register-fulcro-router! SPA TopRouter)
 
 (def ui-top-router (c/factory TopRouter))
 (comment
@@ -33,7 +30,7 @@
    :initial-state (fn [_] {:root/router (c/get-initial-state TopRouter {})})}
   [:div.ui.container
    [:div.ui.secondary.pointing.menu
-    [:a.item {:href (fr/route-href :default)} "Home"]]
+    [:a.item {} "Home"]]
    (ui-top-router router)])
 
 

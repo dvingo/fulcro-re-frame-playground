@@ -1,7 +1,7 @@
 (ns dv.fulcro-re-frame.play.client.application
   (:require
     [com.fulcrologic.fulcro.application :as app]
-    [dv.fulcro-re-frame.play.client.prn-debug :refer [pprint-str]]
+    ;[dv.fulcro-re-frame.play.client.prn-debug :refer [pprint-str]]
     [reagent.core :as r]
     [reagent.dom :as rdom]
     [re-frame.db :as rdb]))

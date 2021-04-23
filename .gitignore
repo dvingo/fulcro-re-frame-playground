@@ -24,3 +24,4 @@ package-lock.json
 .shadow-cljs
 builds/
 prn_debug.cljs
+fe-bundle-report.html

@@ -1,12 +1,8 @@
 (ns dv.fulcro-re-frame.play.client.fe-macros
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.string :as str]
-    ;[camel-snake-kebab.core :refer [->kebab-case]]
-    [dv.fulcro-util :as fu]
-    [com.fulcrologic.fulcro.components :as c]))
-
-(defmacro ns-str [] `(-> &env :ns :name clojure.core/str))
+    [com.fulcrologic.fulcro.components :as c]
+    [dv.fulcro-util :as fu]))
 
 (defn make-sub-keyword
   "Takes prop name (keyword as used in a fulcro query) and returns a string version of it to
@@ -20,13 +16,9 @@
     (str (namespace prop) "-" (name prop))
     (name prop)))
 
-
 (comment
   (make-sub-keyword :goal/id)
   (make-sub-keyword :hi))
-
-;(defn sub-name [cls prop]
-;  (let [[ns-name cls-name] (str/split (c/component-name cls) "/")] (keyword ns-name (str cls-name "-prop")) ) )
 
 (defn re-frame-derive-sub
   "'prop' is non-namespaced simple keyword
@@ -125,10 +117,9 @@
 (defmacro defsc-re-frame
   [& args]
   (let [sym          (first args)
-        sym2         sym ;(->kebab-case sym)
-        ;_            (println "kebab: " sym2)
-        re-frame-sub (db->tree-sub (-> &env :ns :name clojure.core/str) #_(ns-str) sym2)
-        layer-3-subs (parse-layer-3-subs (-> &env :ns :name clojure.core/str) #_(ns-str) args)]
+        ns-name      (-> &env :ns :name clojure.core/str)
+        re-frame-sub (db->tree-sub ns-name sym)
+        layer-3-subs (parse-layer-3-subs ns-name args)]
     (if
       (seq layer-3-subs)
       `(do
@@ -157,7 +148,7 @@
                                   :ui/my-number 0})
       :componentDidMount (fn [this]
                            (log/info "DEBUG did mount"))}
-     (let [v    @(rf/subscribe [::db->tree this])
+     (let [v    @(rf/subscribe [::DebugPage-db->tree this])
            goal (-> gf/goals first
                   gdm/compute-goal-estimated-duration)]
        (em/theme-provider {:theme {:bg "rgba(200,20,0, 0.6)"}}

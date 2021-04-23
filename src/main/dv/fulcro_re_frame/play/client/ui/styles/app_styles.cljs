@@ -1,6 +1,6 @@
 (ns dv.fulcro-re-frame.play.client.ui.styles.app-styles
   (:require
-    [dv.fulcro-re-frame.play.client.prn-debug :refer [pprint-str]]
+    ;[dv.fulcro-re-frame.play.client.prn-debug :refer [pprint-str]]
     [dv.fulcro-re-frame.play.client.ui.styles.style-themes :as themes]
     [com.fulcrologic.fulcro.components :as c]
     [com.fulcrologic.fulcro.application :as app]
@@ -16,7 +16,7 @@
     (when-not v
       (throw
         (fuc/error "Unknown style property: " (pr-str path-or-kw)
-          " - current theme is: " (pprint-str theme))))
+          " - current theme is: " theme)))
     v))
 
 (defn set-current-theme* [s theme] (assoc s :root/style-theme theme))

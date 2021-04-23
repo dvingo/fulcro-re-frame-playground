@@ -1,17 +1,17 @@
 (ns dv.fulcro-re-frame.play.client.ui.task-item
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.string :as str]
     [com.fulcrologic.fulcro.algorithms.form-state :as fs]
     [com.fulcrologic.fulcro.components :as c :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.ui-state-machines :as sm]
     [dv.cljs-emotion-reagent :refer [defstyled]]
-    [dv.fulcro-util :as fu]
     [dv.fulcro-entity-state-machine :as fmachine]
     [dv.fulcro-re-frame.play.data-model.task :as dm]
+    [dv.fulcro-util :as fu]
     [re-frame.core :as rf]
-    [taoensso.timbre :as log]
-    [clojure.string :as str])
+    [taoensso.timbre :as log])
   (:require-macros [dv.fulcro-re-frame.play.client.fe-macros :as rfm :refer [defsc-re-frame]]))
 
 (defstyled flex :div
@@ -38,8 +38,6 @@
 
 (def ui-task-item (c/factory TaskItem {:keyfn :task/id}))
 
-
-
 (defn make-sub-keyword
   "Takes prop name (keyword as used in a fulcro query) and returns a string version of it to
   be used in a re-frame subscription.
@@ -52,7 +50,12 @@
     (str (namespace prop) "-" (name prop))
     (name prop)))
 
-(defn sub-name [cls prop]
+(defn sub-name
+  "Returns a fq keyword following the conventions the macro uses to setup re-frame subscriptions for fulcro components:
+  ComponentName-prop-name
+  or:
+  ComponentName-ns-name-prop-name"
+  [cls prop]
   (let [[ns-name cls-name] (str/split (c/component-name cls) "/")]
     (keyword ns-name (str cls-name "-" (make-sub-keyword prop)))))
 
@@ -60,14 +63,16 @@
 
 (rf/reg-sub
   ::TaskList-total
-  (fn [[_ this]] (rf/subscribe [(sub-name TaskList :all-tasks) this]
-                   #_[::TaskList-all-tasks this]))
+  (fn [[_ this]] (rf/subscribe
+                   [(sub-name TaskList :all-tasks) this]
+                   ;; ^ same as [::TaskList-all-tasks this]
+                   ))
   (fn [items] (reduce (fn [a i] (+ a (:task/number i))) 0 items)))
 
 (defn total-component [this]
   (log/info "render total")
   (let [total @(rf/subscribe [::TaskList-total this])]
-    [:h3 "Total re-frame: " total]))
+    [:h3 "re-frame total: " total]))
 
 (defsc-re-frame TaskList
   [this {:keys [all-tasks]}]
@@ -90,7 +95,7 @@
 
 (def ui-task-list (c/factory TaskList))
 
-(defn task-item-card
+#_(defn task-item-card
   [{:task/keys [id description]}]
   [:div.ui.card {:key id}
    [:div.content>div.ui.tiny.horizontal.list>div.item description]])

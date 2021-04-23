@@ -13,13 +13,13 @@ It is essentially all of fulcro and only re-frame subscriptions.
 # Methods to achieve the goals
 
 - Make the fulcro state atom the re-frame.db/app-db and add reagent rendering support:
-  https://github.com/dvingo/fulcro-re-frame-playground/blob/e3db968dd3dd4d2825ff2d5598a7ae568caf8c4b/src/main/dv/fulcro_re_frame/play/client/application.cljs
+  https://github.com/dvingo/fulcro-re-frame-playground/blob/main/src/main/dv/fulcro_re_frame/play/client/application.cljs
 
 - Add a wrapper macro of `defsc` which:
   - Creates a re-frame subscription returning the fulcro component's `db->tree` whose query is `[::ComponentName-db->tree this]`
   - Allow specifying further re-frame subscriptions to specific props from a fulcro component's query.
-    
-https://github.com/dvingo/fulcro-re-frame-playground/blob/e3db968dd3dd4d2825ff2d5598a7ae568caf8c4b/src/main/dv/fulcro_re_frame/play/client/fe_macros.clj#L125
+
+https://github.com/dvingo/fulcro-re-frame-playground/blob/e759cebc1d8e386f8659e22ed316ceae10a6bb4b/src/main/dv/fulcro_re_frame/play/client/fe_macros.clj#L117
     
 Using the above you can then write further derived re-frame subscriptions using those primitive subscriptions and 
 create reagent components that are re-rendered when this derived data is changed without rendering from root.
@@ -33,6 +33,8 @@ component re-rendering due to the subscription graph triggering an update.
 See it running here:
 
 https://dvingo.github.io/fulcro-re-frame-playground/
+
+(click the "inc" button of any task)
 
 This is an experiment and there will likely be issues if you, for example, want to render a fulcro component from within
 a reagent component (I think you should be able to pass the `db->tree` to the desired fulcro component using a subscription

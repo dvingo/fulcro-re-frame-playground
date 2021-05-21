@@ -14,6 +14,7 @@
 (s/def :task/id fu/id?)
 (s/def :task/description string?)
 (s/def :task/number int?)
+(s/def :db/created-at inst?)
 
 (def required-task-keys [:task/id :task/description])
 (def optional-task-keys [])
@@ -26,11 +27,14 @@
 
 (>defn make-task
   [{:task/keys [id description number]
-    :or        {id (fu/uuid) number 0}}]
+    :db/keys [created-at]
+    :or        {id (fu/uuid) number 0
+                created-at (js/Date.)}}]
   [map? => ::task]
   {:task/id          id
    :task/number      number
-   :task/description description})
+   :task/description description
+   :db/created-at created-at})
 
 (comment (make-task {:task/description "TEST"}))
 

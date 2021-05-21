@@ -22,16 +22,27 @@
 (defstyled bold :div
   {:font-weight "700"})
 
+(defmutation inc-num [_]
+  (action [{:keys [state component]}]
+    (log/info "ident: " (c/get-ident component))
+    (swap! state #(-> % (update-in (conj (c/get-ident component) :task/number) inc)))))
+
+(defn inc-num! [this args]
+  (c/transact!! this [(inc-num args)] {:refresh [:all-tasks]}))
+
 (defsc TaskItem
-  [this {:task/keys [id description number] :ui/keys [show-debug?]}]
-  {:query [:task/id :task/description :task/number :ui/show-debug?]
+  [this {:task/keys [id description number]
+         :db/keys [created-at] :ui/keys [show-debug?]}]
+  {:query [:task/id :task/description :task/number :ui/show-debug?
+           :db/created-at]
    :ident :task/id}
   [:div.ui.segment
    [:h4.ui.header "Task Item"]
    [flex [bold "ID: "] [:span (pr-str id)]]
    [flex [bold "Description: "] [:span description]]
    [flex {:style {:margin-bottom "1em"}} [bold "Number: "] [:span number]]
-   [:button.ui.button.mini {:on-click #(m/set-integer!! this :task/number :value (inc number))} "Inc"]
+   [:button.ui.button.mini {:on-click #_(m/set-integer!! this :task/number :value (inc number))
+                            #(inc-num! this {})} "Inc"]
    [:button.ui.button.mini {:on-click #(m/toggle!! this :ui/show-debug?)}
     (str (if show-debug? "Hide" "Show") " debug")]
    (fu/props-data-debug this show-debug?)])
@@ -69,10 +80,23 @@
                    ))
   (fn [items] (reduce (fn [a i] (+ a (:task/number i))) 0 items)))
 
+(rf/reg-sub
+  ::TaskList-by-date
+  (fn [[_ this]] (rf/subscribe [(sub-name TaskList :all-tasks) this]))
+  (fn [items]
+    (log/info "items: " items)
+    items))
+
 (defn total-component [this]
   (log/info "render total")
   (let [total @(rf/subscribe [::TaskList-total this])]
     [:h3 "re-frame total: " total]))
+
+(defn ui-tasks-by-date [this]
+  ;; todo install spyscope to use during dev
+  (let [by-date @(rf/subscribe [::TaskList-by-date this])]
+    (log/info "by date rendered " by-date)
+    [:h3 "re-frame by-date: " (str (count by-date))]))
 
 (defsc-re-frame TaskList
   [this {:keys [all-tasks]}]
@@ -91,6 +115,7 @@
      [:div.ui.divider]
      [:h3 "fulcro total: " local-total]
      [total-component this]
+     [ui-tasks-by-date this]
      (map ui-task-item all-tasks)]))
 
 (def ui-task-list (c/factory TaskList))

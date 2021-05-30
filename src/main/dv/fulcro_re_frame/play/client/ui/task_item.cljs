@@ -2,16 +2,19 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
+    [dv.fulcro-re-frame.play.client.application :refer [SPA]]
     [com.fulcrologic.fulcro.algorithms.form-state :as fs]
     [com.fulcrologic.fulcro.components :as c :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
     [com.fulcrologic.fulcro.ui-state-machines :as sm]
     [dv.cljs-emotion-reagent :refer [defstyled]]
     [dv.fulcro-entity-state-machine :as fmachine]
     [dv.fulcro-re-frame.play.data-model.task :as dm]
     [dv.fulcro-util :as fu]
     [re-frame.core :as rf]
-    [taoensso.timbre :as log])
+    [taoensso.timbre :as log]
+    [com.fulcrologic.fulcro.application :as app])
   (:require-macros [dv.fulcro-re-frame.play.client.fe-macros :as rfm :refer [defsc-re-frame]]))
 
 (defstyled flex :div
@@ -22,18 +25,26 @@
 (defstyled bold :div
   {:font-weight "700"})
 
+(defn inc-task-num [s ref]
+  (-> s (update-in (conj ref :task/number) inc)))
+;
+;(rf/reg-event-db ::inc
+;  (fn [db [_ this]]
+;    (inc-task-num db this)))
+
 (defmutation inc-num [_]
-  (action [{:keys [state component]}]
-    (log/info "ident: " (c/get-ident component))
-    (swap! state #(-> % (update-in (conj (c/get-ident component) :task/number) inc)))))
+  (action [{:keys [state ref]}]
+    (log/info "inc num ident: " ref)
+    (swap! state #(inc-task-num % ref))))
 
 (defn inc-num! [this args]
   (c/transact!! this [(inc-num args)] {:refresh [:all-tasks]}))
 
 (defsc TaskItem
   [this {:task/keys [id description number]
-         :db/keys [created-at] :ui/keys [show-debug?]}]
+         :db/keys   [created-at] :ui/keys [show-debug?]}]
   {:query [:task/id :task/description :task/number :ui/show-debug?
+           :ui/editing?
            :db/created-at]
    :ident :task/id}
   [:div.ui.segment
@@ -41,6 +52,7 @@
    [flex [bold "ID: "] [:span (pr-str id)]]
    [flex [bold "Description: "] [:span description]]
    [flex {:style {:margin-bottom "1em"}} [bold "Number: "] [:span number]]
+
    [:button.ui.button.mini {:on-click #_(m/set-integer!! this :task/number :value (inc number))
                             #(inc-num! this {})} "Inc"]
    [:button.ui.button.mini {:on-click #(m/toggle!! this :ui/show-debug?)}
@@ -80,23 +92,84 @@
                    ))
   (fn [items] (reduce (fn [a i] (+ a (:task/number i))) 0 items)))
 
+(defn format-date [d] (-> d (.toISOString) (.split "T") first))
+
 (rf/reg-sub
   ::TaskList-by-date
-  (fn [[_ this]] (rf/subscribe [(sub-name TaskList :all-tasks) this]))
+  (fn [[_ arg1 arg2]] (rf/subscribe [(sub-name TaskList :all-tasks) arg1 arg2]))
   (fn [items]
-    (log/info "items: " items)
-    items))
+    (log/info "by date items: " items)
+    (let [by-date (group-by #(-> % :db/created-at format-date) items)]
+      by-date)))
 
 (defn total-component [this]
   (log/info "render total")
   (let [total @(rf/subscribe [::TaskList-total this])]
     [:h3 "re-frame total: " total]))
 
+(comment (format-date (js/Date.)))
+
+;; so next I want to render an input for a task - and have a list of all tasks
+;; and list of tasks by date and then mutate a description of a task and see if it updates.
+;;
+
+(defn format-time [d]
+  (str/join ":" [(.getHours d) (.getMinutes d) (.getSeconds d)]))
+(comment (format-time (new js/Date)))
+
+(defmutation toggle-edit-task [{:task/keys [id]}]
+  (action [{:keys [state]}]
+    (swap! state #(update-in % [:task/id id :ui/editing?] not))))
+
+(defmutation edit-task [{:task/keys [id] :as t}]
+  (action [{:keys [state]}]
+    (swap! state #(update-in % [:task/id id] (fn [t-curr] (merge t-curr t))))))
+
+(defn task-item-view [{:task/keys [id description number] :as t}]
+  [:div.task-item "task item: "
+   [:button.ui.button
+    {:on-click #(c/transact! SPA [(inc-num)] {:ref [:task/id id]})} "inc"]
+   [:button.ui.button.mini {:on-click #(c/transact! SPA [(toggle-edit-task t)]
+                                         {:synchronous? true
+                                          :refresh      [[:task/id id]]
+                                          :ref          [:task/id id]})} "toggle edit"]
+   [:pre "editing: " (pr-str (:ui/editing? t))]
+   [:div (format-time (js/Date.))]
+   [:div "count: " number]
+   (when (:ui/editing? t)
+     [:div
+      [:p "you are editing me: "]
+      [:input {:value (:task/description t) :on-change
+                      (fn [e]
+                        (.log js/console "on change: " (.. e -target -value))
+                        (c/transact! SPA [(edit-task (assoc t :task/description (.. e -target -value)))]
+                          {:synchronous? true
+                           :ref          [:task/id id]}))}]])
+   [:pre (:task/id t)]
+   [:div (:task/description t)]])
+
+
 (defn ui-tasks-by-date [this]
   ;; todo install spyscope to use during dev
   (let [by-date @(rf/subscribe [::TaskList-by-date this])]
     (log/info "by date rendered " by-date)
-    [:h3 "re-frame by-date: " (str (count by-date))]))
+    [:<>
+     [:pre (format-time (js/Date.))]
+     [:h3 "re-frame by-date: " (str (count by-date))]
+
+     #_[:h4 "dates: "]
+     #_(->> (keys by-date)
+         (map (fn [d]
+                ^{:key d}
+                [:p (format-date d)])))
+
+     (for [date (keys by-date)]
+       ^{:key date}
+       [:div
+        [:h2 "date: " date #_(format-date date)]
+        (map (fn [t] ^{:key (:task/id t)}
+               [task-item-view t])
+          (get by-date date))])]))
 
 (defsc-re-frame TaskList
   [this {:keys [all-tasks]}]
@@ -110,20 +183,31 @@
    ::rfm/subs     [:all-tasks]
    :ident         (fn [_] [:component/id ::task-list])
    :query         [{:all-tasks (c/get-query TaskItem)}]}
+  (log/info "REFRESH TaskList")
   (let [local-total (reduce (fn [a i] (+ a (:task/number i))) 0 all-tasks)]
     [:div "This is the list of tasks"
+     [:div (format-time (js/Date.))]
      [:div.ui.divider]
      [:h3 "fulcro total: " local-total]
      [total-component this]
-     [ui-tasks-by-date this]
-     (map ui-task-item all-tasks)]))
+     [:div {:style {:display "flex"}}
+      [ui-tasks-by-date this]
+      (map ui-task-item all-tasks)]]))
+
+(comment
+  (let [db (app/current-state SPA)]
+    (fdn/db->tree (c/get-query TaskList db) [:component/id ::task-list] db))
+  (c/get-query TaskList (app/current-state SPA))
+  )
+(comment
+  @(rf/subscribe [::TaskList-by-date TaskList [:component/id ::task-list]]))
 
 (def ui-task-list (c/factory TaskList))
 
 #_(defn task-item-card
-  [{:task/keys [id description]}]
-  [:div.ui.card {:key id}
-   [:div.content>div.ui.tiny.horizontal.list>div.item description]])
+    [{:task/keys [id description]}]
+    [:div.ui.card {:key id}
+     [:div.content>div.ui.tiny.horizontal.list>div.item description]])
 
 (defn empty-form [] (dm/make-task {:task/description ""}))
 

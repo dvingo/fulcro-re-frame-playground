@@ -1,6 +1,7 @@
 (ns dv.fulcro-re-frame.play.data-model.task
   (:require
     [clojure.spec.alpha :as s]
+    [malli.core :as m]
     [clojure.string :as str]
     [com.fulcrologic.guardrails.core :refer [>defn >def | => ?]]
     [dv.fulcro-util-common :as fu]

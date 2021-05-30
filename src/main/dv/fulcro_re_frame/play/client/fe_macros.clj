@@ -83,7 +83,7 @@
        (fn [db# args#]
          (let [args#     (drop 1 args#)
                num-args# (count args#)]
-           ;(js/console.log "args: " args#)
+           (js/console.log "sub args: " args#)
            (cond
              (= num-args# 0)
              (throw (js/Error. (str "component instance is nil in re-frame subscription."
@@ -100,6 +100,7 @@
              ;; passed component class and ident value
              (= num-args# 2)
              (let [[component-class# ident#] args#]
+               (.log js/console "in 2 args: " args#)
                (assert (c/component-class? component-class#)
                  (str "The first argument to your subscription is not a component class."
                    " subscription: " ~(keyword ns-str (str component-name "-db->tree"))))

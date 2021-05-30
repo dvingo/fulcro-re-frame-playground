@@ -7,6 +7,7 @@
     [dv.fulcro-re-frame.play.client.application :refer [SPA]]
     [dv.fulcro-re-frame.play.client.ui.root :as root]
     [shadow.resource :as rc]
+    [re-frame.core :as rf]
     [taoensso.timbre :as log]))
 
 ;; set logging lvl using goog-define, see shadow-cljs.edn
@@ -26,9 +27,15 @@
   (c/refresh-dynamic-queries! SPA)
   (app/mount! SPA root/Root "app"))
 
+(rf/reg-event-db ::initialize-state
+  (fn [db [_ app]]
+    (log/info "in re-frame init")
+    (app/current-state app)))
+
 (defn ^:export init []
   (log/merge-config! log-config)
   (log/info "Application starting.")
   (app/set-root! SPA root/Root {:initialize-state? true})
   (log/info "MOUNTING APP")
+  (rf/dispatch [::initialize-state SPA])
   (js/setTimeout #(app/mount! SPA root/Root "app" {:initialize-state? true})))
